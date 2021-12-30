@@ -1,0 +1,22 @@
+*{
+    margin:0;
+}
+.hide{
+    display:none;
+}
+.success{
+    background-color:#00aa2088
+}
+.fail{
+    background-color:#aa000088
+}
+#canvas div{
+    /* A4: 701px/1103px */
+    background: linear-gradient(75deg, black 0%, rgba(20,17,47,1) 30%, rgba(0,153,213,1) 100%);
+    width: 794px;
+    height: 374px;
+    margin:auto;
+}
+canvas{
+    margin-left:10px;
+}
