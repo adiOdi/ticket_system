@@ -4,12 +4,33 @@
 .hide{
     display:none;
 }
+body, html{
+    height:100%;
+}
 .success{
     background-color:#00aa2088
 }
 .fail{
     background-color:#aa000088
 }
+.fail, .success{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+}
+.softfail{
+    position:absolute;
+    top:0;
+    left:0;
+    width:10%;
+    height:10%;
+    background-color:#aa6f0088
+}
+/* for printing */
+
+/* card */
 #canvas div{
     /* A4: 701px/1103px */
     background: linear-gradient(75deg, black 0%, rgba(20,17,47,1) 30%, rgba(0,153,213,1) 100%);
@@ -17,6 +38,7 @@
     height: 374px;
     margin:auto;
 }
+/* QR-Code */
 canvas{
     margin-left:10px;
 }
