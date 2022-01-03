@@ -11,7 +11,7 @@ class boolArray{
         let innerIdx=null;
         [outerIdx, innerIdx]=this.convert(idx);
         const innerMask=1<<innerIdx;
-        console.log("mask=",innerMask);
+        //console.log("mask=",innerMask);
         return this.array[outerIdx]&&innerMask!=0;
     }
     set(idx, value=true){
