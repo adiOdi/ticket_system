@@ -1,15 +1,17 @@
 import  encryption  from "./encryption.js";
 import  card  from "./card.js";
 import QrScanner from './scanner.js';
-
+import boolArray from './boolArray.js';
+// import QRCodeStyling from './qrcodegenerator.js';
 const makeRead=false; //false => print; true => scan
 
-// setup //////////////////////////////////////
-let admin=new encryption(65,77039393,59629259);
+// setup ///////////////////////////////////////
+const admin=new encryption(65,77039393,59629259);
 let nonce=10;
 let qrScanner=null;
+let usedNonces=new boolArray();
 
-// scanning cards //////////////////////////////////////////
+// scanning cards //////////////////////////////////////////////////////////////
 if(makeRead){
     // https://openbase.com/js/qr-scanner/documentation
     
@@ -21,12 +23,11 @@ if(makeRead){
     qrScanner.setCamera('environment');
     qrScanner.setInversionMode('invert');
 
-    // start ///////////////////////////////////
+    // start ////////////////////////////
     qrScanner.start();
 } 
 
-
-// creating cards //////////////////////////////////////////
+// creating cards //////////////////////////////////////////////////////////////
 else {
     while(nonce<16){
         const code=createCode();
@@ -38,24 +39,30 @@ else {
     console.log("last used nonce:", nonce)
 }
 
+////////////////////////////////////////////////////////////////////////////////
 
-
-
-////////////////////////////////////////////////////////////////////////////
+// process qr-code /////////////////////////////////////////////////////////////
 
 function processresult(result){
     const nonce=validateCode(result)
     if(nonce){
-        console.log("success! ticket#:",nonce)
+        qrScanner.stop();
+        if(checkUsed(nonce)){
+            console.log("already used ticket");
+        } else {
+            console.log("success! ticket#:",nonce);
+        }
+        
     } else {
         console.log("Code not valid")
     }
-    qrScanner.stop();
-    qrScanner.destroy();
-    qrScanner = null;
+    qrScanner.start();
+    // qrScanner.stop();
+    // qrScanner.destroy();
+    // qrScanner = null;
 }
 
-/////////////////////////////////////////////////////////////////////////////
+// creating and validating codes ///////////////////////////////////////////////
 
 function createCode(){
     nonce++;
@@ -73,5 +80,13 @@ function validateCode(code){
     // console.log("decrypted:",nonce);
     return admin.hash(nonce)==hash ? nonce:0;
 }
-
-/////////////////////////////////////////////////////////////////////////////
+function checkUsed(nonce){
+    if(usedNonces.get(nonce)){
+        return false;
+    } else {
+        // write
+        usedNonces.set(nonce);
+        return true;
+    }
+}
+////////////////////////////////////////////////////////////////////////////////
