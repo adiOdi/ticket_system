@@ -1,1 +1,0 @@
-document.getElementById('maindiv').className='blue';
