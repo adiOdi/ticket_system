@@ -1,5 +1,5 @@
 class encryption{
-    // http://my.core.com/~katiemarie10/prime/prime1-1G.htm max:65 000 (very slow that wayp)
+    // http://my.core.com/~katiemarie10/prime/prime1-1G.htm max:65 000 (very slow that way)
     constructor(puKey=null, prKey=null, mod=null){
         if(!(puKey&&prKey&&mod)){
             // no arguments, create new default key/value pair
