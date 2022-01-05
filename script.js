@@ -1,6 +1,5 @@
-import  encryption  from "./encryption.js";
 import  card  from "./card.js";
-import QrScanner from './scanner.js';
+import QrScanner from './libraries/scanner.js';
 // import boolArray from './boolArray.js';
 // import QRCodeStyling from './qrcodegenerator.js';
 // https://rawgit.com/MrRio/jsPDF/master/docs/index.html
@@ -49,7 +48,7 @@ create.addEventListener("click", () => {
 // scanning cards //////////////////////////////////////////////////////////////
 function startScanner(password){
     // https://openbase.com/js/qr-scanner/documentation
-    QrScanner.WORKER_PATH = './scanner-worker.js';
+    QrScanner.WORKER_PATH = './libraries/scanner-worker.js';
 
     const videoElem=document.getElementById("video");
     qrScanner = new QrScanner(videoElem, result => processresult(password,result));
