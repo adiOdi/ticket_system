@@ -18,13 +18,13 @@ class card{
             }
         });    
         const div = document.createElement("div");
-        div.class = "card";
+        div.className = "card";
         const p = document.createElement("p");
         p.innerHTML = "Maturaball";
         div.appendChild(p)
         qrCode.append(div);
         
-        document.getElementById("canvas").appendChild(div);
+        document.getElementById("cards").appendChild(div);
     }
 }
 
