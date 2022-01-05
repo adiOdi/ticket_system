@@ -1,91 +1,122 @@
 import  encryption  from "./encryption.js";
 import  card  from "./card.js";
 import QrScanner from './scanner.js';
-import boolArray from './boolArray.js';
+// import boolArray from './boolArray.js';
 // import QRCodeStyling from './qrcodegenerator.js';
-const makeRead=true; //false => print; true => scan
-const DEBUG=false;
+// https://rawgit.com/MrRio/jsPDF/master/docs/index.html
+
+// Settings: /////////////////////
+const security=16; //slice of hash to take for verification, higher is bigger QR
+////////////////////////////////////////////////////////////////////////////////
 
 // setup ///////////////////////////////////////
-const admin=new encryption(65,77039393,59629259);
-let nonce=10;
 let qrScanner=null;
-let usedNonces=new Array(1000).fill(false);//new boolArray();
 let blockQR=false;
+let softFail=false;
+let password=null;
+
+// for StringArray: how many bools per character, max 5, 4 is hex;
+const base=5;
+// clear: (or just clear cash)
+// localStorage.setItem("usedNonces", "0");
+
+const form=document.getElementById('betterForm');
+
+const scan=document.getElementById('scan');
+scan.addEventListener("click", () => {
+    password=form.elements["password"].value;
+    if(!password){
+        alert("please enter password!");
+    } else {
+        form.className='hide';
+        startScanner(password);
+    }
+});
+
+const create=document.getElementById('create');
+create.addEventListener("click", () => {
+    password=form.elements["password"].value;
+    if(!password){
+        alert("please enter password!");
+    } else {
+        form.className='hide';
+        const from=form.elements["from"].value;
+        const to=form.elements["to"].value;
+        createCards(from,to,password);
+    }
+});
 
 // scanning cards //////////////////////////////////////////////////////////////
-if(makeRead){
-    if(DEBUG){
-        processresult('22877751:4147942');
-    } else {
+function startScanner(password){
     // https://openbase.com/js/qr-scanner/documentation
-    
     QrScanner.WORKER_PATH = './scanner-worker.js';
 
     const videoElem=document.getElementById("video");
-    qrScanner = new QrScanner(videoElem, result => processresult(result));
+    qrScanner = new QrScanner(videoElem, result => processresult(password,result));
     // show scanRegion
     document.getElementById("scanRegion").className = "";
-    // qrScanner.setCamera('environment');
+    qrScanner.setCamera('environment');
     qrScanner.setInversionMode('invert');
     document.getElementById('scanRegion').appendChild(qrScanner.$canvas);
     // start ////////////////////////////
     qrScanner.start();
-    }
 } 
 
 // creating cards //////////////////////////////////////////////////////////////
-else {
-    const canvas=document.getElementById('canvas');
-    canvas.className='';
-    while(nonce<16){
-        const code=createCode();
-        console.log(validateCode(code));
-        console.log(code);
+async function createCards(from, to, password) {
+    let nonce;
+    for(nonce=from;nonce<=to;nonce++){
+        const code = await createCode(password, nonce);
+        console.log(await validateCode(password, code),code);
         const screen = new card(code);
         screen.render();
     }
-    window.print();
-    console.log("last used nonce:", nonce)
+    document.getElementById('body').style="align-items:baseline";
+    const cards=document.getElementById('cards');
+    cards.className='';
+    setTimeout(()=>{window.print()},30*nonce);
+    console.log("next 'from' nonce:", nonce)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // process qr-code /////////////////////////////////////////////////////////////
 
-function processresult(result){
+async function processresult(password, result){
     if(blockQR) return;
     blockQR=true;
-    const nonce=validateCode(result)
-    const canvas=document.getElementById('canvas');
+    const nonce=await validateCode(password, result)
+    const alert=document.getElementById('alert');
     if(nonce){
-        // if(!DEBUG) qrScanner.stop();
         
-        const videoElem=document.getElementById("scanRegion");
-        videoElem.className='hide';
+        // const videoElem=document.getElementById("scanRegion");
+        // videoElem.className='hide';
         if(checkUsed(nonce)){
-            console.log("already used ticket");
-            canvas.className="fail";
-            canvas.innerHTML="Already used ticket. Press to continue.";
+            console.log("already used ticket#", nonce);
+            alert.className="fail";
+            alert.firstElementChild.innerHTML="Already used ticket<br>Press to continue";
         } else {
-            console.log("success! ticket#:",nonce);
-            canvas.className="success";
-            canvas.innerHTML="Ticket is valid! Press to continue.";
+            console.log("success! ticket#",nonce);
+            alert.className="success";
+            alert.firstElementChild.innerHTML="Ticket is valid!<br>Press to continue";
         }
-        canvas.onclick=function(){
+        alert.onclick=function(){
             console.log('next please');
-            canvas.className='hide';
-            videoElem.className='';
-            if(!DEBUG) qrScanner.start();
-            if(DEBUG) processresult('22877751:4147942');
+            alert.className='hide';
+            // videoElem.className='';
+            qrScanner.start();
             blockQR=false;
         };
     } else {
-        canvas.className='softfail';
-        canvas.innerHTML="Ticket not valid";
-        setTimeout(function(){
-            canvas.className='hide';
-        },2000)
+        if(!softFail){
+            alert.className='softfail';
+            alert.firstElementChild.innerHTML="Ticket not valid";
+            softFail=true;
+            setTimeout(function(){
+                alert.className='hide';
+                softFail=false;
+            },2000)
+        }
         console.log("Code not valid")
         blockQR=false;
     }
@@ -97,29 +128,58 @@ function processresult(result){
 
 // creating and validating codes ///////////////////////////////////////////////
 
-function createCode(){
-    nonce++;
-    // console.log("nonce:",nonce);
-    // console.log("hash:",admin.hash(nonce));
-    // console.log("encrypted:",admin.private(nonce));
-    return String(admin.private(nonce)).concat(':'+String(admin.hash(nonce)))
+async function createCode(password, nonce){
+    const hash = await digestMessage(password.concat(nonce));
+    const QR=hash.concat(':').concat(nonce);
+    return QR;
 }
 
-function validateCode(code){
+async function validateCode(password, code){
+    if(!code.includes(':')) return 0;
     const split=code.split(':');
-    const hash=split[1];
-    const nonce=admin.public(split[0]);
-    // console.log("hash:",hash);
-    // console.log("decrypted:",nonce);
-    return admin.hash(nonce)==hash ? nonce:0;
+    const hash=split[0];
+    const nonce=split[1];
+    return hash == await digestMessage(password.concat(nonce)) ? nonce:0;
 }
 function checkUsed(nonce){
-    if(usedNonces[nonce]){
+    let storage=localStorage.getItem("usedNonces");
+    if(stringArrayGet(storage, nonce)){
         return true;
     } else {
         // write
-        usedNonces[nonce]=true;
+        localStorage.setItem("usedNonces", stringArrayFlip(storage, nonce));
         return false;
     }
 }
+
+function stringArrayGet(str, idx){
+    str=str?str:"0";
+    str=str.padEnd(Math.floor(idx/base),'0');
+    const nr=parseInt(str.charAt(Math.floor(idx/base)),2**base);
+    const binary=nr.toString(2).padStart(base,'0');
+    return binary[idx%base]=='1';
+}
+function stringArrayFlip(str, idx){
+    str=str?str:"0";
+    str=str.padEnd(Math.floor(idx/base),'0');
+    const nr=parseInt(str.charAt(Math.floor(idx/base)),2**base);
+    const newNr = (nr ^ 1<<base-1-(idx%base)).toString(2**base);
+    const newStr=replaceChar(str, newNr, Math.floor(idx/base));
+    return newStr;
+}
+function replaceChar(origString, replaceChar, index) {
+    
+    let firstPart = origString.substr(0, index);
+    let lastPart = origString.substr(index + 1);
+    let newString = firstPart + replaceChar + lastPart;
+    return newString;
+}
 ////////////////////////////////////////////////////////////////////////////////
+
+async function digestMessage(message) {
+    const msgUint8 = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex.substring(0,security);
+}
