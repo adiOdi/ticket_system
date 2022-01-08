@@ -25,6 +25,21 @@ body{
     margin-right:0.5em;
     width:20%;
 }
+.button, .input {
+    background-color:white;
+    border-radius:0.25em;
+    border:none;
+    font-size:large;
+    text-align:center;
+}
+.button{
+    padding-top:0.25em;
+    padding-bottom:0.25em;
+    padding:0.25em 0.6em;
+}
+.button:hover{
+    background-color:lightgrey;
+}
 form hr{
     margin-top:1em;
     margin-bottom:1em;

@@ -20,31 +20,44 @@ const base=5;
 // localStorage.setItem("usedNonces", "0");
 
 const form=document.getElementById('betterForm');
-
+const storedPw=sessionStorage.getItem("password");
+document.getElementById("password").value=storedPw;
+if(sessionStorage.getItem("scanner")=="true" && storedPw) {
+    onScan();
+}
 const scan=document.getElementById('scan');
-scan.addEventListener("click", () => {
+scan.addEventListener("click", ()=>{onScan()});
+
+const create=document.getElementById('create');
+create.addEventListener("click", ()=>{onCreate()});
+
+function onScan(){
     password=form.elements["password"].value;
+    sessionStorage.setItem("password", password);
+    sessionStorage.setItem("scanner", "true");
     if(!password){
         alert("please enter password!");
     } else {
         form.className='hide';
         startScanner(password);
     }
-});
-
-const create=document.getElementById('create');
-create.addEventListener("click", () => {
+}
+function onCreate(){
     password=form.elements["password"].value;
+    sessionStorage.setItem("password", password);
     if(!password){
         alert("please enter password!");
     } else {
-        form.className='hide';
         const from=form.elements["from"].value;
         const to=form.elements["to"].value;
-        createCards(from,to,password);
+        const lastUsedNonce=localStorage.getItem("lastUsedNonce")|0;
+        if(from<=lastUsedNonce)alert(`already used this range\nnext usable nonce is ${lastUsedNonce+1}`);
+        else{
+            form.className='hide';
+            createCards(from,to,password);
+        }
     }
-});
-
+}
 // scanning cards //////////////////////////////////////////////////////////////
 function startScanner(password){
     // https://openbase.com/js/qr-scanner/documentation
@@ -74,7 +87,8 @@ async function createCards(from, to, password) {
     const cards=document.getElementById('cards');
     cards.className='';
     setTimeout(()=>{window.print()},30*nonce);
-    console.log("next 'from' nonce:", nonce)
+    console.log("next 'from' nonce:", nonce);
+    localStorage.setItem("lastUsedNonce", nonce-1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
