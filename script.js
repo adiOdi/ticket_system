@@ -37,6 +37,7 @@ const create=document.getElementById('create');
 create.addEventListener("click", ()=>{onCreate()});
 
 function onScan(){
+    document.title="Scanner";
     password=form.elements["password"].value;
     sessionStorage.setItem("password", password);
     sessionStorage.setItem("scanner", "true");
@@ -48,6 +49,7 @@ function onScan(){
     }
 }
 function onCreate(){
+    document.title="Generating Cards";
     password=form.elements["password"].value;
     sessionStorage.setItem("password", password);
     if(!password){
