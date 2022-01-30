@@ -45,6 +45,7 @@ function onScan(){
         alert("please enter password!");
     } else {
         form.className='hide';
+        document.getElementById("footer").className='hide';
         startScanner(password);
     }
 }
@@ -62,6 +63,7 @@ function onCreate(){
         else if(from>to)alert("from has to be smaller than to");
         else{
             form.className='hide';
+            document.getElementById("footer").className='hide';
             createCards(from,to,password);
         }
     }
