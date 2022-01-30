@@ -6,4 +6,4 @@ The hash function used is part of the crypto-API.
 As this is a static page, it does not support cross-device-syncing of already scanned tickets. 
 The verification of the password and saving the already used nonces per device works through.
 
-The site is visible under: <a href="ticket.ondasadriel.com">ticket.ondasadriel.com</a>
+The site is visible under: <a href="https://ticket.ondasadriel.com">ticket.ondasadriel.com</a>
