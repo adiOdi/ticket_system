@@ -19,9 +19,9 @@ class card{
         });    
         const div = document.createElement("div");
         div.className = "card";
-        const p = document.createElement("p");
-        p.innerHTML = "Maturaball";
-        div.appendChild(p)
+        // const p = document.createElement("p");
+        // p.innerHTML = "Maturaball";
+        // div.appendChild(p)
         qrCode.append(div);
         
         document.getElementById("cards").appendChild(div);
