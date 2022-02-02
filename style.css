@@ -10,7 +10,6 @@ body{
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:2em;
     font-weight:bolder;
     font-family:sans-serif;
     text-align:center;
@@ -29,24 +28,27 @@ body{
     background-color:white;
     border-radius:0.25em;
     border:none;
-    font-size:large;
-    text-align:center;
-}
-.button{
-    padding-top:0.25em;
-    padding-bottom:0.25em;
     padding:0.25em 0.6em;
+    color:#000;
 }
 .button:hover{
     background-color:lightgrey;
+}
+form *{
+    font-size: 1em;
+    text-align:center;
+    margin-top:0.5em;
+    margin-bottom:0.5em;
+}
+form label{
+    color:white;
+    font-size: 2em;
 }
 form hr{
     margin-top:1em;
     margin-bottom:1em;
 }
-form{
-    color:white;
-}
+
 /* Alert window */
 .success{background-color:#3aa74eaa;}
 .fail{background-color:#aa3333aa;}
